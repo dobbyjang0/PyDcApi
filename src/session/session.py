@@ -18,13 +18,11 @@ async def acess_session(token_verify, target_url, require_conkey=True, csrf_toke
     else:
         payload = { "token_verify": token_verify, }
 
-    url = "https://m.dcinside.com/ajax/access"
     headers = XML_HTTP_REQ_HEADERS.copy()
-
     headers.update({
         "Referer" : target_url,
         "X-CSRF-TOKEN" : csrf_token
     })
 
-    async with Session().post(url, headers=headers, data=payload) as res:
+    async with Session().post(ACCESS_URL, headers=headers, data=payload) as res:
         return (await res.json())["Block_key"]
