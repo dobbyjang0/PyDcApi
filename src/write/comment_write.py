@@ -1,6 +1,7 @@
 from src.session.session import Session, acess_session
 from src.const.default_header import XML_HTTP_REQ_HEADERS
-from src.const.url import HTTPS_DC_URL, DC_URL, DOCUMENT_URL, COMMENT_WRITE_URL
+from src.const.url import HTTPS_DC_URL, DC_URL, DOCUMENT_URL, COMMENT_WRITE_AJAX
+from src.const.const import GA_COOKIE
 from src.useful_function.useful_function import quote, unquote
 
 import asyncio
@@ -18,7 +19,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
         csrf_token = parsed.xpath("//meta[@name='csrf-token']")[0].get("content")
         title = parsed.xpath("//span[@class='tit']")[0].text.strip()
         board_name = parsed.xpath("//a[@class='gall-tit-lnk']")[0].text.strip()
-        con_key = await acess_session("dc_check2", url, require_conkey=False, csrf_token=csrf_token)
+        con_key = await acess_session("com_submit", url, require_conkey=False, csrf_token=csrf_token)
 
         return {'hide_robot': hide_robot,
                 'csrf_token': csrf_token,
@@ -40,7 +41,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
     cookies = {
         f"m_dcinside_{board_id}": board_id,
         "m_dcinside_lately": quote(f"{board_id}|{doc_info['board_name']},"),
-        "_ga": "GA1.2.693521455.1588839880",
+        "_ga": GA_COOKIE,
     }
 
     payload = {
@@ -60,7 +61,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
         doc_info['hide_robot']: "1",
     }
 
-    async with Session().post(COMMENT_WRITE_URL, headers=header, data=payload, cookies=cookies) as res:
+    async with Session().post(COMMENT_WRITE_AJAX, headers=header, data=payload, cookies=cookies) as res:
         parsed = await res.text()
 
     return parsed

@@ -1,12 +1,14 @@
 import aiohttp
 import lxml.html
 from src.const.default_header import GET_HEADERS, XML_HTTP_REQ_HEADERS
+from src.const.url import ACCESS_AJAX
+from src.const.const import GA_COOKIE
 
 class Session:
     # 싱글톤
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "_instance"):
-            cls._instance = aiohttp.ClientSession(headers=GET_HEADERS, cookies={"_ga": "GA1.2.693521455.1588839880"})
+            cls._instance = aiohttp.ClientSession(headers=GET_HEADERS, cookies={"_ga": GA_COOKIE})
         return cls._instance
 
 async def acess_session(token_verify, target_url, require_conkey=True, csrf_token=None):
@@ -24,5 +26,5 @@ async def acess_session(token_verify, target_url, require_conkey=True, csrf_toke
         "X-CSRF-TOKEN" : csrf_token
     })
 
-    async with Session().post(ACCESS_URL, headers=headers, data=payload) as res:
+    async with Session().post(ACCESS_AJAX, headers=headers, data=payload) as res:
         return (await res.json())["Block_key"]
