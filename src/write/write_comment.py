@@ -1,6 +1,6 @@
 from src.session.session import Session, acess_session
 from src.const.default_header import XML_HTTP_REQ_HEADERS
-from src.const.url import HTTPS_DC_URL, DC_URL, DOCUMENT_URL, COMMENT_WRITE_AJAX
+from src.const.url import HTTPS_DC_URL, DC_URL, DOCUMENT_VIEW_URL, COMMENT_WRITE_AJAX
 from src.const.const import GA_COOKIE
 from src.useful_function.useful_function import quote, unquote
 
@@ -11,7 +11,7 @@ import json
 
 async def write_comment(board_id='api', document_id=358, contents="안됨...", name="ㅇㅇ", password="1234", parent_comment_id=""):
     async def get_document_info():
-        url = DOCUMENT_URL(board_id, document_id)
+        url = DOCUMENT_VIEW_URL(board_id, document_id)
         async with Session().get(url) as res:
             parsed = lxml.html.fromstring(await res.text())
 
@@ -32,7 +32,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
 
     header = XML_HTTP_REQ_HEADERS.copy()
     header.update({
-        "Referer": DOCUMENT_URL(board_id, document_id),
+        "Referer": DOCUMENT_VIEW_URL(board_id, document_id),
         "Host": DC_URL,
         "Origin": HTTPS_DC_URL,
         "X-CSRF-TOKEN": doc_info['csrf_token'],
