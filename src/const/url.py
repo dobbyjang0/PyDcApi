@@ -6,8 +6,10 @@ UPLOAD_HOST_URL = "mupload.dcinside.com"
 COMMENT_WRITE_AJAX = "https://m.dcinside.com/ajax/comment-write"
 ACCESS_AJAX = "https://m.dcinside.com/ajax/access"
 WRITE_FILTER_AJAX = "https://m.dcinside.com/ajax/w_filter"
+IMAGE_FILTER_AJAX = "https://m.dcinside.com/ajax/i_filter"
 
 WRITE_PHP = "https://mupload.dcinside.com/write_new.php"
+UPLOAD_IMG_PHP = "https://mupload.dcinside.com/upload_img.php"
 
 
 def DOCUMENT_VIEW_URL(board_id, document_id):

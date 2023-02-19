@@ -4,3 +4,5 @@
 # Dependencies
 .env
 .idea/
+__pycache__/
+test/
