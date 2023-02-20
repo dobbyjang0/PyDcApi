@@ -100,6 +100,8 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
     async with Session().post(WRITE_PHP, headers=header, data=payload, cookies=cookies) as res:
         res_final = await res.text()
 
+    image.unload()
+
     return res_final
 
 

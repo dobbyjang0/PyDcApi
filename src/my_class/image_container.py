@@ -29,3 +29,7 @@ class ImageContainer:
             self._data_list.append(data)
 
         self.is_ready = True
+
+    def unload(self):
+        self.is_ready = False
+        self._data_list = []
