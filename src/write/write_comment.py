@@ -39,7 +39,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
     })
 
     cookies = {
-        f"m_dcinside_{board_id}": board_id,
+        f"m_downside_{board_id}": board_id,
         "m_dcinside_lately": quote(f"{board_id}|{doc_info['board_name']},"),
         "_ga": GA_COOKIE,
     }

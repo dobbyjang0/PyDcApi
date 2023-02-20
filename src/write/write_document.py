@@ -8,7 +8,10 @@ import lxml.html
 import asyncio
 
 
-async def write_document(board_id='api', title="도와줘요2", contents="제발요", name="ㅇㅇ", password="1234"):
+async def write_document(board_id='api', title="도와줘요2", contents="제발요", name="ㅇㅇ", password="1234", image=None):
+    if not(image is None or image.is_ready):
+        raise Exception('이미지가 준비되있지 않습니다.')
+
     async def get_write_info():
         url = DOCUMENT_WRITE_URL(board_id)
         async with Session().get(url) as res:
@@ -39,7 +42,7 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
     header = XML_HTTP_REQ_HEADERS.copy()
     header.update({
         "Referer": DOCUMENT_WRITE_URL(board_id),
-        "X-CSRF-TOKEN" : write_info['csrf_token']
+        "X-CSRF-TOKEN": write_info['csrf_token']
     })
 
     payload = {
@@ -59,7 +62,7 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
     header = POST_HEADERS.copy()
     header.update({
         "Host": UPLOAD_HOST_URL,
-        "Referer" : DOCUMENT_WRITE_URL(board_id)
+        "Referer": DOCUMENT_WRITE_URL(board_id)
     })
 
     payload = {
@@ -68,17 +71,16 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
         write_info['hide_robot']: "1",
         "GEY3JWF": write_info['hide_robot'],
         "id": board_id,
-        "contentOrder": "order_memo",
+        "contentOrder": image.content_order if image else "order_memo",
         "mode": "write",
         "Block_key": write_info['con_key'],
         "bgm": "",
-        "iData": "",
+        "iData": image.i_data if image else "",
         "yData": "",
         "tmp": "",
         "imgSize": "850",
         "is_minor": "1" if write_info['is_minor'] else "",
         "mobile_key": write_info['mobile_key'],
-        "GEY3JWF": write_info['hide_robot'],
     }
 
     if write_info['rand_code']:

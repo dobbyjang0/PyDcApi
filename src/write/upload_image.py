@@ -7,6 +7,7 @@ from src.useful_function.useful_function import quote, unquote, safe_get
 import lxml.html
 import asyncio
 import aiohttp
+import re
 
 
 async def upload_image(board_id='api', file_path=''):
@@ -14,7 +15,6 @@ async def upload_image(board_id='api', file_path=''):
         url = DOCUMENT_WRITE_URL(board_id)
         async with Session().get(url) as res:
             parsed = lxml.html.fromstring(await res.text())
-
 
         rand_code = safe_get(parsed.xpath("//input[@name='code']"), "value")
         user_id = safe_get(parsed.xpath("//input[@name='user_id']"), "value")
@@ -43,7 +43,7 @@ async def upload_image(board_id='api', file_path=''):
     header = XML_HTTP_REQ_HEADERS.copy()
     header.update({
         "Referer": DOCUMENT_WRITE_URL(board_id),
-        "X-CSRF-TOKEN" : write_info['csrf_token']
+        "X-CSRF-TOKEN": write_info['csrf_token']
     })
 
     payload = {
@@ -56,7 +56,7 @@ async def upload_image(board_id='api', file_path=''):
     header = POST_HEADERS.copy()
     header.update({
         "Host": UPLOAD_HOST_URL,
-        "Referer" : DOCUMENT_WRITE_URL(board_id)
+        "Referer": DOCUMENT_WRITE_URL(board_id)
     })
 
     payload = aiohttp.FormData({
@@ -67,12 +67,9 @@ async def upload_image(board_id='api', file_path=''):
     file = open(file_path, 'rb')
 
     payload.add_field('upload[]',
-               file,
-               filename='test.jpg',
-               content_type='image/jpg')
-
-    file.close()
-
+                      file,
+                      filename='test.jpg',
+                      content_type='image/jpg')
 
     cookies = {
         f"m_dcinside_{board_id}": board_id,
@@ -83,9 +80,13 @@ async def upload_image(board_id='api', file_path=''):
     async with Session().post(UPLOAD_IMG_PHP, headers=header, data=payload, cookies=cookies) as res:
         res_final = await res.text()
 
-    return res_final
+    file.close()
+
+    img_data = re.search(r"(?<='img',').*(?=',0\);)", res_final).group()
+
+    return img_data
 
 
 if __name__ == '__main__':
-    value = asyncio.run(upload_image('api', 'test/test.jpg'))
+    value = asyncio.run(upload_image('api', "C:/Users/dobbyjang/Desktop/PyDCApi/test/article.jpg"))
     print(value)
