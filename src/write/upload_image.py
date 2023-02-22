@@ -16,25 +16,13 @@ async def upload_image(board_id='api', file_path=''):
         async with Session().get(url) as res:
             parsed = lxml.html.fromstring(await res.text())
 
-        rand_code = safe_get(parsed.xpath("//input[@name='code']"), "value")
-        user_id = safe_get(parsed.xpath("//input[@name='user_id']"), "value")
-        mobile_key = parsed.xpath("//input[@id='mobile_key']")[0].get("value")
-        hide_robot = parsed.xpath("//input[@class='hide-robot']")[0].get("name")
         csrf_token = parsed.xpath("//meta[@name='csrf-token']")[0].get("content")
-        con_key = await acess_session("dc_check2", url, require_conkey=False, csrf_token=csrf_token)
         board_name = parsed.xpath("//a[@class='gall-tit-lnk']")[0].text.strip()
-        is_minor = parsed.xpath("//input[@id='is_minor']")[0].get("value")
         r_key = parsed.xpath("//input[@name='r_key']")[0].get("value")
 
         return {
-            'rand_code': rand_code,
-            'user_id': user_id,
-            'mobile_key': mobile_key,
-            'hide_robot': hide_robot,
             'csrf_token': csrf_token,
-            'con_key': con_key,
             'board_name': board_name,
-            'is_minor': is_minor,
             'r_key': r_key
         }
 

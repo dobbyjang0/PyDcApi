@@ -1,6 +1,8 @@
 HTTPS_DC_URL = 'https://m.dcinside.com'
 DC_URL = 'm.dcinside.com'
 UPLOAD_HOST_URL = "mupload.dcinside.com"
+LOGIN_HOST_URL = "msign.dcinside.com"
+
 
 # ajax 관련
 COMMENT_WRITE_AJAX = "https://m.dcinside.com/ajax/comment-write"

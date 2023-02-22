@@ -6,6 +6,7 @@ from src.useful_function.useful_function import quote, unquote, safe_get
 
 import lxml.html
 import asyncio
+import re
 
 
 async def write_document(board_id='api', title="도와줘요2", contents="제발요", name="ㅇㅇ", password="1234", image=None):
@@ -100,11 +101,21 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
     async with Session().post(WRITE_PHP, headers=header, data=payload, cookies=cookies) as res:
         res_final = await res.text()
 
-    image.unload()
+    if image: image.unload()
 
-    return res_final
+    if 'refresh' in res_final:
+        return {'is_done': True}
+    else:
+        fail_reason = re.search(r"(?<=alert\(').*(?=\.)", res_final).group()
+        available_time = re.search(r"(?<=간 : ).*(?='\);)", res_final).group()
+
+        return {
+            'is_done': False,
+            'fail_reason': fail_reason,
+            'available_time': available_time
+        }
 
 
 if __name__ == '__main__':
-    value = asyncio.run(write_document(title="파이파이파이썬", contents="이거는 왜 됨?"))
+    value = asyncio.run(write_document(title="💉파이파이파이썬", contents="이거는 왜 됨?"))
     print(value)
