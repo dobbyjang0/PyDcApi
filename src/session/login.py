@@ -52,7 +52,11 @@ async def login(id, password):
     }
 
     async with Session().post(LOGIN_URL, headers=header, data=payload, cookies=cookies) as res:
-        res_final = await res.text()
+        res_final = res.cookies
 
     return res_final
 
+if __name__ == "__main__":
+    value = asyncio.run(login())
+    print(value['dc_m_login']['expires'])
+    print('do')

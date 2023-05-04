@@ -2,6 +2,7 @@ from src.session.session import Session, acess_session
 from src.const.default_header import XML_HTTP_REQ_HEADERS, POST_HEADERS
 from src.const.url import DOCUMENT_WRITE_URL, WRITE_FILTER_AJAX, UPLOAD_HOST_URL, WRITE_PHP
 from src.const.const import GA_COOKIE
+from src.const.default import DEFAULT_USER
 from src.useful_function.useful_function import quote, unquote, safe_get
 
 import lxml.html
@@ -9,9 +10,16 @@ import asyncio
 import re
 
 
-async def write_document(board_id='api', title="도와줘요2", contents="제발요", name="ㅇㅇ", password="1234", image=None):
+async def write_document(board_id='api', title="도와줘요2", contents="제발요", user=DEFAULT_USER, image=None):
     if not(image is None or image.is_ready):
         raise Exception('이미지가 준비되있지 않습니다.')
+
+    if not(user.type in ('login', "anonymous")):
+        print(type(user))
+        raise Exception('유저 정보가 정확하지 않습니다.')
+
+    if user.type == 'login' and not user.is_login:
+        raise Exception('로그인 후 사용바람.')
 
     async def get_write_info():
         url = DOCUMENT_WRITE_URL(board_id)
@@ -19,7 +27,7 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
             parsed = lxml.html.fromstring(await res.text())
 
         rand_code = safe_get(parsed.xpath("//input[@name='code']"), "value")
-        user_id = safe_get(parsed.xpath("//input[@name='user_id']"), "value") if not name else None
+        user_id = safe_get(parsed.xpath("//input[@name='user_id']"), "value") if user.type=="Login" else None
         mobile_key = parsed.xpath("//input[@id='mobile_key']")[0].get("value")
         hide_robot = parsed.xpath("//input[@class='hide-robot']")[0].get("name")
         csrf_token = parsed.xpath("//meta[@name='csrf-token']")[0].get("content")
@@ -86,17 +94,23 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
 
     if write_info['rand_code']:
         payload["code"] = write_info['rand_code']
-    if name:
-        payload["name"] = name
-        payload["password"] = password
+    if user.type == "anonymous":
+        payload["name"] = user.id
+        payload["password"] = user.password
     else:
-        payload["user_id"] = write_info['user_id']
+        payload["user_id"] = user.id
 
-    cookies = {
-        f"m_dcinside_{board_id}": board_id,
-        "m_dcinside_lately": quote(f"{board_id}|{write_info['board_name']},"),
-        "_ga": GA_COOKIE,
-    }
+    if user.type == "anonymous":
+        cookies = {
+            f"m_dcinside_{board_id}": board_id,
+            "m_dcinside_lately": quote(f"{board_id}|{write_info['board_name']},"),
+            "_ga": GA_COOKIE,
+        }
+    else:
+        cookies = user.cookie.copy()
+        cookies[f"m_dcinside_{board_id}"] = board_id
+        cookies["m_dcinside_lately"] = quote(f"{board_id}|{write_info['board_name']},")
+        cookies["_ga"] = GA_COOKIE
 
     async with Session().post(WRITE_PHP, headers=header, data=payload, cookies=cookies) as res:
         res_final = await res.text()
@@ -106,16 +120,16 @@ async def write_document(board_id='api', title="도와줘요2", contents="제발
     if 'refresh' in res_final:
         return {'is_done': True}
     else:
-        fail_reason = re.search(r"(?<=alert\(').*(?=\.)", res_final).group()
-        available_time = re.search(r"(?<=간 : ).*(?='\);)", res_final).group()
+        print(res_final)
+        fail_reason = res_final
 
         return {
             'is_done': False,
             'fail_reason': fail_reason,
-            'available_time': available_time
         }
 
 
 if __name__ == '__main__':
-    value = asyncio.run(write_document(title="💉파이파이파이썬", contents="이거는 왜 됨?"))
+    contents = 'test'
+    value = asyncio.run(write_document(title="❗파이파이파이썬", contents=contents))
     print(value)

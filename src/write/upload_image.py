@@ -53,11 +53,12 @@ async def upload_image(board_id='api', file_path=''):
     })
 
     file = open(file_path, 'rb')
+    file_ex = re.search(r"[a-z]{3,4}$", file_path).group()
 
     payload.add_field('upload[]',
                       file,
-                      filename='test.jpg',
-                      content_type='image/jpg')
+                      filename=f'beautiful4me.{file_ex}',
+                      content_type=f'image/{file_ex}')
 
     cookies = {
         f"m_dcinside_{board_id}": board_id,
