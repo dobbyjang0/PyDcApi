@@ -2,7 +2,7 @@ from src.session.session import Session, acess_session
 from src.const.default_header import XML_HTTP_REQ_HEADERS
 from src.const.url import HTTPS_DC_URL, DC_URL, DOCUMENT_VIEW_URL, COMMENT_WRITE_AJAX
 from src.const.const import GA_COOKIE
-from src.useful_function.useful_function import quote, unquote
+from src.useful_function.useful_function import quote, unquote, safe_get
 
 import asyncio
 import lxml.html
@@ -15,6 +15,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
         async with Session().get(url) as res:
             parsed = lxml.html.fromstring(await res.text())
 
+        rand_code = safe_get(parsed.xpath("//input[@name='rand_codeC']"), "value")
         hide_robot = parsed.xpath("//input[@class='hide-robot']")[0].get("name")
         csrf_token = parsed.xpath("//meta[@name='csrf-token']")[0].get("content")
         title = parsed.xpath("//span[@class='tit']")[0].text.strip()
@@ -26,6 +27,7 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
                 'title': title,
                 'board_name': board_name,
                 'con_key': con_key,
+                'rand_code': rand_code
                 }
 
     doc_info = await get_document_info()
@@ -60,6 +62,10 @@ async def write_comment(board_id='api', document_id=358, contents="안됨...", n
         "con_key": doc_info['con_key'],
         doc_info['hide_robot']: "1",
     }
+
+    if doc_info['rand_code']:
+        payload["rand_code"] = doc_info['rand_code']
+        payload["captcha_code"] = "adasd"
 
     async with Session().post(COMMENT_WRITE_AJAX, headers=header, data=payload, cookies=cookies) as res:
         parsed = await res.text()
